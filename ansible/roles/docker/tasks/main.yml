@@ -11,25 +11,25 @@
       - device-mapper-persistent-data
       - lvm2
     state: present
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: Add Docker repo for CentOS/RHEL
   get_url:
     url: https://download.docker.com/linux/centos/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
     mode: '0644'
-  when: ansible_distribution in ["CentOS", "RedHat"]
+  when: ansible_facts['distribution'] in ["CentOS", "RedHat"]
 
 - name: Add Docker repo for Amazon Linux 2
   shell: |
     amazon-linux-extras install docker -y
-  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+  when: ansible_facts['distribution'] == "Amazon" and ansible_facts['distribution_major_version'] == "2"
   changed_when: false
 
 - name: Update yum cache
   yum:
     update_cache: yes
-  when: ansible_distribution in ["CentOS", "RedHat"]
+  when: ansible_facts['distribution'] in ["CentOS", "RedHat"]
 
 - name: Install Docker Engine (CentOS/RHEL)
   yum:
@@ -39,13 +39,13 @@
       - containerd.io
     state: present
     disable_excludes: docker
-  when: ansible_distribution in ["CentOS", "RedHat"]
+  when: ansible_facts['distribution'] in ["CentOS", "RedHat"]
 
 - name: Install Docker (Amazon Linux)
   yum:
     name: docker
     state: present
-  when: ansible_distribution == "Amazon"
+  when: ansible_facts['distribution'] == "Amazon"
 
 - name: Install Python3 and pip
   yum:
