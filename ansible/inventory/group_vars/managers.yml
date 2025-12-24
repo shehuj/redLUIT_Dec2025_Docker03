@@ -6,5 +6,5 @@ swarm_manager: true
 docker_swarm_manager_options: "--availability active"
 
 # Stack deployment settings
-stack_name: mystack
+stack_name: jenkinsstack
 stack_file: /tmp/docker-stack.yml
