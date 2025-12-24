@@ -4,6 +4,6 @@
     dest: /tmp/docker-stack.yml
 
 - name: Deploy stack
-  command: docker stack deploy --with-registry-auth -c /tmp/docker-stack.yml mystack
-  become: yes
+  command: docker stack deploy --with-registry-auth -c /tmp/docker-stack.yml jenkinsstack
+  become: true
   when: inventory_hostname in groups['managers']
