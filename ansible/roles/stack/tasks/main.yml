@@ -17,6 +17,17 @@
     seconds: 10
   when: inventory_hostname in groups['managers']
 
+- name: Wait for Jenkins to start
+  pause:
+    seconds: 15
+  when: inventory_hostname in groups['managers']
+
+- name: Get Jenkins initial admin password
+  shell: docker exec $(docker ps -q -f name=jenkinsstack_jenkins) cat /var/jenkins_home/secrets/initialAdminPassword 2>/dev/null || echo "Jenkins starting... Please wait 30 seconds and check logs"
+  register: jenkins_password
+  become: true
+  when: inventory_hostname in groups['managers']
+
 - name: Display service access URLs
   debug:
     msg:
@@ -25,6 +36,10 @@
       - "========================================="
       - ""
       - "Access your services at:"
+      - ""
+      - "  Jenkins CI/CD:"
+      - "    URL: http://{{ hostvars[groups['managers'][0]].ansible_host }}:8081"
+      - "    Initial Password: {{ jenkins_password.stdout }}"
       - ""
       - "  Web Application (Nginx):"
       - "    http://{{ hostvars[groups['managers'][0]].ansible_host }}"
@@ -36,7 +51,11 @@
       - "Useful Commands:"
       - "  docker service ls                    # List all services"
       - "  docker stack services jenkinsstack   # List stack services"
-      - "  docker service logs <service_name>   # View service logs"
+      - "  docker service logs jenkinsstack_jenkins   # View Jenkins logs"
+      - "  docker service logs <service_name>   # View other service logs"
+      - ""
+      - "To get Jenkins password later:"
+      - "  docker exec $(docker ps -q -f name=jenkinsstack_jenkins) cat /var/jenkins_home/secrets/initialAdminPassword"
       - "========================================="
   when: inventory_hostname in groups['managers']
 
