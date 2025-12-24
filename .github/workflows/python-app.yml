@@ -4,8 +4,6 @@
 name: Python application
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -38,6 +36,6 @@ jobs:
       run: |
         pytest tests/
 
-    - name: Test with pytest
+    - name: Compliance Checks
       run: |
         python3 tests/check_required_files.py
