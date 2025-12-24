@@ -30,6 +30,29 @@ services:
     networks:
       - webnet
 
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      - JENKINS_OPTS=--prefix=/jenkins
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    networks:
+      - webnet
+
 networks:
   webnet:
     driver: overlay
+
+volumes:
+  jenkins_home:
+    driver: local
