@@ -150,6 +150,27 @@ git push origin main
 
 After successful deployment, access your services:
 
+### **Jenkins CI/CD Server**
+```
+http://<manager-ip>:8081
+```
+- Jenkins LTS (Long Term Support)
+- Runs on manager nodes only
+- Persistent data stored in Docker volume
+- Initial admin password displayed after deployment
+
+**First-time setup:**
+1. Access Jenkins at `http://<manager-ip>:8081`
+2. Use the initial admin password (shown in deployment output)
+3. Install recommended plugins
+4. Create your first admin user
+
+**Get initial password manually:**
+```bash
+# SSH to manager node
+docker exec $(docker ps -q -f name=jenkinsstack_jenkins) cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
 ### **Web Application (Nginx)**
 ```
 http://<manager-ip>
@@ -169,6 +190,7 @@ http://<manager-ip>:8080
 
 **Example** (replace with your manager IP):
 ```
+http://35.170.80.190:8081   # Jenkins
 http://35.170.80.190        # Web application
 http://35.170.80.190:8080   # Swarm visualizer
 ```
