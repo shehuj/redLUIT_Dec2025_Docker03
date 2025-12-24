@@ -1,0 +1,10 @@
+---
+# Variables specific to Docker Swarm manager nodes
+swarm_manager: true
+
+# Manager-specific Docker configurations
+docker_swarm_manager_options: "--availability active"
+
+# Stack deployment settings
+stack_name: mystack
+stack_file: /tmp/docker-stack.yml

@@ -1,0 +1,13 @@
+---
+# Common variables for all hosts
+ansible_user: ansible
+ansible_become: yes
+ansible_become_method: sudo
+
+# Docker configuration
+docker_compose_version: "2.23.0"
+docker_users:
+  - "{{ ansible_user }}"
+
+# Network configuration
+docker_network_mtu: 1500

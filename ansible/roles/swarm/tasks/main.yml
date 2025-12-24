@@ -1,0 +1,12 @@
+- name: Initialize Docker Swarm on manager
+  community.docker.docker_swarm:
+    state: present
+    advertise_addr: "{{ ansible_host }}"
+  when: inventory_hostname in groups['managers']
+
+- name: Join worker nodes to Swarm
+  community.docker.docker_swarm:
+    state: join
+    join_token: worker
+    remote_addrs: "{{ hostvars[groups['managers'][0]].ansible_host }}"
+  when: inventory_hostname in groups['workers']
