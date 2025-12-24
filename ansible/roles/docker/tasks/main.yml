@@ -59,6 +59,7 @@
     name: docker>=5.0.0
     executable: pip3
     state: present
+    extra_args: --ignore-installed
 
 - name: Start and enable Docker service
   systemd:
