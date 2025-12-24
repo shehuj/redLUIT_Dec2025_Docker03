@@ -146,21 +146,54 @@ git commit -m "Deploy updates"
 git push origin main
 ```
 
-## Monitoring
+## Accessing Deployed Services
 
-Access the Docker Swarm Visualizer:
+After successful deployment, access your services:
+
+### **Web Application (Nginx)**
+```
+http://<manager-ip>
+```
+- Default Nginx welcome page
+- 2 replicas for high availability
+- Load balanced across swarm nodes
+
+### **Docker Swarm Visualizer**
 ```
 http://<manager-ip>:8080
 ```
+- Visual representation of your swarm cluster
+- Shows services, nodes, and container distribution
+- Real-time updates
+- Runs only on manager nodes
+
+**Example** (replace with your manager IP):
+```
+http://35.170.80.190        # Web application
+http://35.170.80.190:8080   # Swarm visualizer
+```
+
+## Monitoring
 
 View running services:
 ```bash
 docker service ls
 ```
 
-Check service logs:
+Check stack services:
 ```bash
-docker service logs <service-name>
+docker stack services jenkinsstack
+```
+
+View service logs:
+```bash
+docker service logs jenkinsstack_web
+docker service logs jenkinsstack_visualizer
+```
+
+Scale services:
+```bash
+docker service scale jenkinsstack_web=5
 ```
 
 ## Troubleshooting
