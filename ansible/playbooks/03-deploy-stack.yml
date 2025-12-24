@@ -1,0 +1,4 @@
+- hosts: managers
+  become: true
+  roles:
+    - stack

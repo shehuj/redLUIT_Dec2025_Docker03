@@ -1,0 +1,10 @@
+---
+# Variables specific to Docker Swarm worker nodes
+swarm_worker: true
+
+# Worker-specific Docker configurations
+docker_swarm_worker_options: "--availability active"
+
+# Resource limits
+worker_memory_limit: "4g"
+worker_cpu_limit: "2.0"

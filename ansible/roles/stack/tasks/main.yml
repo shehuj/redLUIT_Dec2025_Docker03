@@ -1,0 +1,9 @@
+- name: Copy stack file
+  copy:
+    src: ../stacks/docker-stack.yml
+    dest: /tmp/docker-stack.yml
+
+- name: Deploy stack
+  command: docker stack deploy --with-registry-auth -c /tmp/docker-stack.yml mystack
+  become: yes
+  when: inventory_hostname in groups['managers']
