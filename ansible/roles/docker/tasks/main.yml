@@ -1,4 +1,9 @@
 ---
+- name: Gather OS facts
+  setup:
+    gather_subset:
+      - distribution
+
 - name: Install required packages
   yum:
     name:
@@ -6,20 +11,53 @@
       - device-mapper-persistent-data
       - lvm2
     state: present
+  when: ansible_os_family == "RedHat"
 
-- name: Add Docker repo
+- name: Add Docker repo for CentOS/RHEL
   get_url:
     url: https://download.docker.com/linux/centos/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
     mode: '0644'
+  when: ansible_distribution in ["CentOS", "RedHat"]
 
-- name: Install Docker Engine
+- name: Add Docker repo for Amazon Linux 2
+  shell: |
+    amazon-linux-extras install docker -y
+  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+  changed_when: false
+
+- name: Update yum cache
   yum:
-    name: docker-ce
-    state: present
+    update_cache: yes
+  when: ansible_distribution in ["CentOS", "RedHat"]
 
-- name: Start Docker
+- name: Install Docker Engine (CentOS/RHEL)
+  yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    disable_excludes: docker
+  when: ansible_distribution in ["CentOS", "RedHat"]
+
+- name: Install Docker (Amazon Linux)
+  yum:
+    name: docker
+    state: present
+  when: ansible_distribution == "Amazon"
+
+- name: Start and enable Docker service
   systemd:
     name: docker
     enabled: yes
     state: started
+
+- name: Add users to docker group
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_users }}"
+  when: docker_users is defined
+
