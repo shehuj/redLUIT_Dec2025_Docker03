@@ -1,3 +1,4 @@
+---
 - name: Initialize Docker Swarm on manager
   community.docker.docker_swarm:
     state: present
