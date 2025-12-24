@@ -3,11 +3,31 @@
   community.docker.docker_swarm:
     state: present
     advertise_addr: "{{ ansible_host }}"
+  register: swarm_info
   when: inventory_hostname in groups['managers']
+
+- name: Get worker join token from manager
+  community.docker.docker_swarm_info:
+  register: swarm_facts
+  when: inventory_hostname in groups['managers']
+
+- name: Set worker join token fact
+  set_fact:
+    worker_token: "{{ swarm_facts.swarm_facts.JoinTokens.Worker }}"
+  when:
+    - inventory_hostname in groups['managers']
+    - swarm_facts.swarm_facts is defined
+
+- name: Share worker token with all hosts
+  set_fact:
+    worker_join_token: "{{ hostvars[groups['managers'][0]].worker_token }}"
+  when: inventory_hostname in groups['workers']
 
 - name: Join worker nodes to Swarm
   community.docker.docker_swarm:
     state: join
-    join_token: worker
-    remote_addrs: "{{ hostvars[groups['managers'][0]].ansible_host }}"
+    join_token: "{{ worker_join_token }}"
+    remote_addrs:
+      - "{{ hostvars[groups['managers'][0]].ansible_host }}:2377"
   when: inventory_hostname in groups['workers']
+
