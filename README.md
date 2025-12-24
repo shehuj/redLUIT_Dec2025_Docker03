@@ -167,11 +167,16 @@ docker service logs <service-name>
 
 ### SSH Connection Issues
 
-Ensure SSH key is added to GitHub secrets:
-```bash
-cat ~/.ssh/id_rsa | base64
-# Add to GitHub > Settings > Secrets > SSH_PRIVATE_KEY
-```
+**Error**: `Permission denied (publickey)`
+
+This means Ansible cannot authenticate to your servers. See the complete [SSH Setup Guide](SSH_SETUP.md) for detailed instructions.
+
+**Quick fix**:
+1. Verify correct username in `ansible/inventory/group_vars/all.yml` (default: `ec2-user`)
+2. Add your SSH public key to all remote servers' `~/.ssh/authorized_keys`
+3. Add the private key to GitHub Secrets as `SSH_PRIVATE_KEY`
+
+For detailed step-by-step instructions, see **[SSH_SETUP.md](SSH_SETUP.md)**
 
 ### Docker Installation Fails
 

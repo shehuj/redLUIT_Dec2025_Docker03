@@ -1,6 +1,11 @@
 ---
 # Common variables for all hosts
-ansible_user: ansible
+# Change ansible_user based on your OS:
+# - ec2-user (Amazon Linux, RHEL on EC2)
+# - ubuntu (Ubuntu)
+# - centos (CentOS)
+# - admin (Debian)
+ansible_user: ec2-user
 ansible_become: yes
 ansible_become_method: sudo
 
