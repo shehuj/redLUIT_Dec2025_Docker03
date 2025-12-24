@@ -10,3 +10,33 @@
   command: docker stack deploy --with-registry-auth -c /tmp/docker-stack.yml jenkinsstack
   become: true
   when: inventory_hostname in groups['managers']
+  register: stack_deploy
+
+- name: Wait for services to be ready
+  pause:
+    seconds: 10
+  when: inventory_hostname in groups['managers']
+
+- name: Display service access URLs
+  debug:
+    msg:
+      - "========================================="
+      - "Stack 'jenkinsstack' deployed successfully!"
+      - "========================================="
+      - ""
+      - "Access your services at:"
+      - ""
+      - "  Web Application (Nginx):"
+      - "    http://{{ hostvars[groups['managers'][0]].ansible_host }}"
+      - ""
+      - "  Docker Swarm Visualizer:"
+      - "    http://{{ hostvars[groups['managers'][0]].ansible_host }}:8080"
+      - ""
+      - "========================================="
+      - "Useful Commands:"
+      - "  docker service ls                    # List all services"
+      - "  docker stack services jenkinsstack   # List stack services"
+      - "  docker service logs <service_name>   # View service logs"
+      - "========================================="
+  when: inventory_hostname in groups['managers']
+
