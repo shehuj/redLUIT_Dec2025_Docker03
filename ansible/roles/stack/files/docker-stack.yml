@@ -37,6 +37,9 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+      - jenkins_backup:/var/jenkins_backup
+    environment:
+      - JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=true
     deploy:
       replicas: 1
       placement:
@@ -45,6 +48,9 @@ services:
       restart_policy:
         condition: on-failure
         max_attempts: 3
+      update_config:
+        parallelism: 1
+        failure_action: rollback
     networks:
       - webnet
 
@@ -55,3 +61,14 @@ networks:
 volumes:
   jenkins_home:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/jenkins/data
+
+  jenkins_backup:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/jenkins/backup

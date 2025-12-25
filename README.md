@@ -115,11 +115,12 @@ Runs on push and pull requests:
 
 ### Docker Stack
 
-Customize your application stack in `ansible/roles/stack/stacks/docker-stack.yml`.
+Customize your application stack in `ansible/roles/stack/files/docker-stack.yml`.
 
 Default stack includes:
 - **Web**: Nginx web server (2 replicas)
 - **Visualizer**: Docker Swarm visualizer UI
+- **Jenkins**: Jenkins CI/CD server with persistent storage
 
 ### Variables
 
@@ -167,10 +168,27 @@ http://<manager-ip>:8080
 - Real-time updates
 - Runs only on manager nodes
 
+### **Jenkins CI/CD**
+```
+http://<manager-ip>:8081
+```
+- Full-featured Jenkins automation server
+- Initial admin password displayed after deployment
+- Persistent data storage at `/opt/jenkins/data`
+- Backup directory at `/opt/jenkins/backup`
+- Runs only on manager nodes
+
+**Initial Setup**:
+1. Access Jenkins at `http://<manager-ip>:8081`
+2. Use the initial admin password from deployment output
+3. Complete the setup wizard
+4. Install recommended plugins
+
 **Example** (replace with your manager IP):
 ```
 http://35.170.80.190        # Web application
 http://35.170.80.190:8080   # Swarm visualizer
+http://35.170.80.190:8081   # Jenkins CI/CD
 ```
 
 ## Monitoring
@@ -189,11 +207,68 @@ View service logs:
 ```bash
 docker service logs jenkinsstack_web
 docker service logs jenkinsstack_visualizer
+docker service logs jenkinsstack_jenkins
 ```
 
 Scale services:
 ```bash
 docker service scale jenkinsstack_web=5
+```
+
+## Jenkins Data Persistence
+
+Jenkins data is persisted using bind mounts to ensure data survives container restarts and updates.
+
+### Storage Locations
+
+- **Jenkins Home**: `/opt/jenkins/data` - Contains all Jenkins configuration, jobs, plugins, and build history
+- **Jenkins Backup**: `/opt/jenkins/backup` - Dedicated directory for backups
+
+### Backup Jenkins Data
+
+Create a backup of your Jenkins configuration:
+
+```bash
+# On the manager node
+docker exec $(docker ps -q -f name=jenkinsstack_jenkins) tar czf /var/jenkins_backup/jenkins-backup-$(date +%Y%m%d-%H%M%S).tar.gz -C /var/jenkins_home .
+```
+
+Copy backup to local machine:
+
+```bash
+scp ec2-user@<manager-ip>:/opt/jenkins/backup/jenkins-backup-*.tar.gz ./
+```
+
+### Restore Jenkins Data
+
+To restore Jenkins from a backup:
+
+```bash
+# On the manager node, stop Jenkins service
+docker service scale jenkinsstack_jenkins=0
+
+# Extract backup
+tar xzf /opt/jenkins/backup/jenkins-backup-YYYYMMDD-HHMMSS.tar.gz -C /opt/jenkins/data/
+
+# Restore ownership
+chown -R 1000:1000 /opt/jenkins/data
+
+# Restart Jenkins
+docker service scale jenkinsstack_jenkins=1
+```
+
+### Verify Data Persistence
+
+Check that Jenkins data persists across restarts:
+
+```bash
+# Scale down Jenkins
+docker service scale jenkinsstack_jenkins=0
+
+# Scale back up
+docker service scale jenkinsstack_jenkins=1
+
+# Your Jenkins configuration and jobs should remain intact
 ```
 
 ## Troubleshooting

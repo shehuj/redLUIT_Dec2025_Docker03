@@ -1,4 +1,17 @@
 ---
+- name: Create Jenkins persistent directories on manager
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: '1000'
+    group: '1000'
+  loop:
+    - /opt/jenkins/data
+    - /opt/jenkins/backup
+  become: true
+  when: inventory_hostname in groups['managers']
+
 - name: Copy stack file to manager
   copy:
     src: docker-stack.yml
@@ -56,6 +69,13 @@
       - ""
       - "To get Jenkins password later:"
       - "  docker exec $(docker ps -q -f name=jenkinsstack_jenkins) cat /var/jenkins_home/secrets/initialAdminPassword"
+      - ""
+      - "Jenkins Data Persistence:"
+      - "  Data Location: /opt/jenkins/data"
+      - "  Backup Location: /opt/jenkins/backup"
+      - ""
+      - "To backup Jenkins:"
+      - "  docker exec $(docker ps -q -f name=jenkinsstack_jenkins) tar czf /var/jenkins_backup/jenkins-backup-$(date +%Y%m%d-%H%M%S).tar.gz -C /var/jenkins_home ."
       - "========================================="
   when: inventory_hostname in groups['managers']
 
