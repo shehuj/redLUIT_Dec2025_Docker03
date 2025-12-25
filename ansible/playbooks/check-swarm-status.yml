@@ -1,0 +1,62 @@
+---
+- name: Check Docker Swarm Status
+  hosts: managers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: List all swarm nodes
+      command: docker node ls
+      register: node_list
+
+    - name: Display swarm nodes
+      debug:
+        msg: "{{ node_list.stdout_lines }}"
+
+    - name: List all services
+      command: docker service ls
+      register: service_list
+
+    - name: Display services
+      debug:
+        msg: "{{ service_list.stdout_lines }}"
+
+    - name: Check web service placement
+      command: docker service ps jenkinsstack_web
+      register: web_placement
+      ignore_errors: true
+
+    - name: Display web service placement
+      debug:
+        msg: "{{ web_placement.stdout_lines }}"
+
+    - name: Check all stack services
+      command: docker stack ps jenkinsstack
+      register: stack_services
+      ignore_errors: true
+
+    - name: Display stack services
+      debug:
+        msg: "{{ stack_services.stdout_lines }}"
+
+- name: Check Workers Swarm Status
+  hosts: workers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Check if Docker is running
+      command: systemctl is-active docker
+      register: docker_status
+      ignore_errors: true
+
+    - name: Display Docker status
+      debug:
+        msg: "Docker on {{ inventory_hostname }}: {{ docker_status.stdout }}"
+
+    - name: Check swarm status
+      shell: docker info | grep -E "Swarm"
+      register: swarm_info
+      ignore_errors: true
+
+    - name: Display swarm info
+      debug:
+        msg: "{{ swarm_info.stdout_lines }}"
